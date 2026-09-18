@@ -1,1 +1,39 @@
+;CONFIGURA PUERTOS E INICIALIZACION DEL ATMEGA328P"
+.inlude "m328pdef.inc"
+.cseg
+.org 0x0000
+rjmp RESET
 
+RESET:
+ldi r16, HIGH (RAMEND)
+out SPH, r16
+
+ldi r16, LOW (RAMEND)
+out SPL, r16
+
+ldi r16, 0b11111100
+out DDRD, r16
+
+ldi r16, 0b00111111
+out DDRB, r16
+
+ldi r16, 0b00001111
+out DDRC, r16
+
+rcall APAGAR_TODO
+ldi r16, 0
+sts UBRR0H, r16
+
+ldi r16, 103
+sts UBRR0L, r16
+
+ldi r16, (1<< RXEN0)|(1<<TXEN0)
+sts UCSR0B
+
+ldi r16, (1<<UCSZ01)|(1<<UCSZ00)
+sts UCSR0C, r16
+
+ldi r22, 0
+ldi r23, 0
+ldi r19, 1
+rcall MENU

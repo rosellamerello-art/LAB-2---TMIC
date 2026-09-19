@@ -88,3 +88,242 @@ rjmp EJECUTAR_MODO
 VELOCIDAD_RAPIDA:
 ldi r19, 3
 rjmp EJECUTAR_MODO
+
+EJECUTAR_MODO:
+cpi r22, 1
+breq MODO_MENSAJE
+
+cpi r22, 2
+breq MODO_CARITA
+
+cpi r22, 3
+breq MODO_GUINO
+
+rjmp MAIN
+
+MODO_MENSAJE:
+rcall MOSTRAR_VENTANA
+inc r23
+cpi r23, 95
+brlo CONTINUAR_SCROLL
+ldi r23, 0
+
+CONTINUAR_SCROLL:
+rjmp MAIN
+
+MODO_CARITA:
+rcall MOSTRAR_CARITA
+rjmp MAIN
+
+MODO_GUINO:
+rcall MOSTRAR_GUINO
+rjmp MAIN
+
+USART_TX:
+ESPERAR_TX:
+lds r18, UCSR0A
+sbrs r18, UDRE0
+rjmp ESPERAR_TX
+sts UDR0, r16
+ret
+
+MENU:
+ldi r16, 13
+rcall USART_TX
+
+ldi r 16, 10
+rcall USART_TX
+
+ldi r16, 'L'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+ldi r16, 'B'
+rcall USART_TX
+ldi r16, '2'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r 16, '1'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'M'
+rcall USART_TX
+ldi r16, 'E'
+rcall USART_TX
+ldi r16, 'N'
+rcall USART_TX
+ldi r16, 'S'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+ldi r16, 'J'
+rcall USART_TX
+ldi r16, 'E'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r16, '2'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'C'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+ldi r16, 'R'
+rcall USART_TX
+ldi r16, 'I'
+rcall USART_TX
+ldi r16, 'T'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r16, '3'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'G'
+rcall USART_TX
+ldi r16, 'U'
+rcall USART_TX
+ldi r16, 'I'
+rcall USART_TX
+ldi r16, 'N'
+rcall USART_TX
+ldi r16, 'O'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r16, '4'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'L'
+rcall USART_TX
+ldi r16, 'E'
+rcall USART_TX
+ldi r16, 'N'
+rcall USART_TX
+ldi r16, 'T'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r16, '5'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'M'
+rcall USART_TX
+ldi r16, 'E'
+rcall USART_TX
+ldi r16, 'D'
+rcall USART_TX
+ldi r16, 'I'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+rcall NUEVA_LINEA
+
+ldi r16, '6'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, '-'
+rcall USART_TX
+ldi r16, ' '
+rcall USART_TX
+ldi r16, 'R'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+ldi r16, 'P'
+rcall USART_TX
+ldi r16, 'I'
+rcall USART_TX
+ldi r16, 'D'
+rcall USART_TX
+ldi r16, 'A'
+rcall USART_TX
+rcall NUEVA_LINEA
+ret
+
+NUEVA_LINEA:
+ldi r16, 13
+rcall USART_TX
+ldi r16, 10
+rcall USART_TX
+ret
+
+;IMPLEMENTA MULTIPLEXADO DE MATRÍZ 8X8
+
+MOSTRAR_COLUMNAS:
+ldi r25, 0
+
+SIGUIENTE_COLUMNA:
+ldi ZH, HIGH(MENSAJE*2)
+ldi ZL, LOW(MENSAJE*2)
+
+add ZL, r23
+clr r16
+adc ZH, r16
+
+lpm r20, Z
+rcall MOSTRAR_COLUMNA
+
+inc r25
+cpi r25, 8
+brne SIGUIENTE_COLUMNA
+ret
+
+MOSTRAR_COLUMNA:
+rcall APAGAR_TODO
+
+cpi r25, 0
+breq COL1
+
+cpi r25, 1
+breq COL2
+
+cpi r25, 2
+breq COL3
+
+cpi r25, 3
+breq COL4
+
+cpi r25, 4
+breq COL5
+
+cpi r25, 5
+breq COL6
+
+cpi r25, 6
+breq COL7
+
+rjmp COL8
+

@@ -10,5 +10,18 @@ out SPH, r16
 ldi r16, LOW (RAMEND)
 out SPL, r16
 
+; DAC: PD2-PD7 salidas
+ldi r16, 0b11111100
+out DDRD, r16
+
+; DAC: PB0-PB1 salidas
+ldi r16, 0b00000011
+out DDRB, r16
+
+;Salidas inicialmente en cero
+ldi r16, 0
+out PORTD, r16
+out PORTB, r16
+
 MAIN:
 rjmp MAIN

@@ -428,3 +428,139 @@ sbi PORTB, 5
 sbi PORTc, 0
 cbi PORTd, 3
 rcall RETARDO_MUX
+
+rcall APAGAR_TODO
+sbi PORTC, 0
+cbi PORTD, 4
+rcall RETARDO_MUX
+
+rcall APAGAR_TODO
+sbi PORTB, 1
+sbi PORTC, 0
+cbi PORTD, 6
+rcall RETARDO_MUX
+
+rcall APAGAR_TODO
+sbi PORTB, 2
+sbi PORTB, 3
+sbi PORTB, 4
+sbi PORTB, 5
+cbi PORTD, 7
+rcall RETARDO_MUX
+
+ret
+
+APAGAR_TODO:
+ldi r16, 0
+out PORTB, r16
+
+cbi PORTC, 0
+cbi PORTC, 1
+
+ldi r16, 0b11111100
+out PORTD, r16
+sbi PORTC, 2
+sbi PORTC, 3
+
+ret
+
+RETARDO_MUX:
+
+ldi r18, 60
+
+MUX_LOOP:
+
+dec r18
+brne MUX_LOOP
+
+ret
+
+;IMPLEMENTA DESPLAZAMIENTO Y VELOCIDAD VARIABLE
+
+MOSTRAR_VENTANA:
+cpi r19, 1
+breq RETARDO_SCROLL_LENTO
+
+cpi r19, 2
+breq RETARDO_SCROLL_MEDIO
+rjmp RETARDO_SCROLL_RAPIDO
+
+RETARDO_SCROLL_LENTO:
+ldi r24, 2
+LENTO_EXTERNO:
+ldi r21, 190
+LENTO_INTERNO:
+rcall MOSTRAR_COLUMNAS
+dec r21
+brne LENTO_INTERNO
+dec r24
+brne LENTO_EXTERNO
+
+ret
+
+RETARDO_SCROLL_MEDIO:
+ldi r24, 2
+MEDIO_EXTERNO:
+ldi r21, 100
+MEDIO_INTERNO:
+rcall MOSTRAR_COLUMNAS
+dec r21
+brne MEDIO_INTERNO
+dec r24
+brne MEDIO_EXTERNO
+
+ret
+
+RETARDO_SCROLL_RAPIDO:
+ldi r24, 1
+RAPIDO_EXTERNO:
+ldi r21, 100
+RAPIDO_INTERNO:
+rcall MOSTRAR_COLUMNAS
+dec r21
+brne RAPIDO_INTERNO
+dec r24
+brne RAPIDO_EXTERNO
+
+ret
+
+;AGREGA LUT "MICROS LO MEJOR"
+
+MENSAJE:
+; 8 columnas vacias iniciales
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+; M
+.db 0x7F,0x02,0x04,0x02,0x7F,0x00
+; I
+.db 0x41,0x7F,0x41,0x00,0x00,0x00
+; C
+.db 0x3E,0x41,0x41,0x41,0x22,0x00
+; R
+.db 0x7F,0x09,0x19,0x29,0x46,0x00
+; O
+.db 0x3E,0x41,0x41,0x41,0x3E,0x00
+; S
+.db 0x46,0x49,0x49,0x49,0x31,0x00
+; Espacio entre MICROS y LO
+.db 0x00,0x00,0x00,0x00
+; L
+.db 0x7F,0x40,0x40,0x40,0x40,0x00
+; O
+.db 0x3E,0x41,0x41,0x41,0x3E,0x00
+; Espacio entre LO y MEJOR
+.db 0x00,0x00,0x00,0x00
+; M
+.db 0x7F,0x02,0x04,0x02,0x7F,0x00
+; E
+.db 0x7F,0x49,0x49,0x49,0x41,0x00
+; J
+.db 0x20,0x40,0x41,0x3F,0x01,0x00
+; O
+.db 0x3E,0x41,0x41,0x41,0x3E,0x00
+; R
+.db 0x7F,0x09,0x19,0x29,0x46,0x00
+; 8 columnas vacias finales
+.db 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+
+
+

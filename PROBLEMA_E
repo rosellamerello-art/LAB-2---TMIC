@@ -1,1 +1,200 @@
+; ============================================================
+; LABORATORIO 2 - PROBLEMA E
+; AUTOMATIZACION DE PUERTA DE GARAJE
+; ATmega328P / Arduino UNO
+; Motor 28BYJ-48 + ULN2003
+;
+; ENTRADAS ACTIVAS EN LOW:
+; D8 / PB0 = ABRIR
+; D9 / PB1 = CERRAR
+; D10 / PB2 = PUERTA ABIERTA
+; D11 / PB3 = PUERTA CERRADA
+; A0 / PC0 = OBSTACULO (PCINT8)
+;
+; MOTOR / ULN2003:
+; D4 / PD4 = IN1
+; D5 / PD5 = IN2
+; D6 / PD6 = IN3
+; D7 / PD7 = IN4
+;
+; INDICADORES:
+; D12 / PB4 = LED ABRIENDO
+; D13 / PB5 = LED CERRANDO
+; A1 / PC1 = ALARMA / BUZZER
+;
+; USART:
+; D0 / PD0 = RX
+; D1 / PD1 = TX
+;
+; ESTADOS r20:
+; 0=CERRADA, 1=ABRIENDO, 2=ABIERTA,
+; 3=CERRANDO, 4=DETENIDA POR SEGURIDAD
+;
+; r21 = bandera de mensaje de obstaculo
+; r22 = indice de paso del motor (0..7)
+; ============================================================
+.include "m328p. inc"
+.cseg
+.org PIC1addr 
+rjmp PCINT_ISR
+
+RESET:
+
+ldi r16, HIGH(RAMEND)
+out SPH, r16
+ldi r16, LOW(RAMEND)
+out SPL, r16
+
+ldi r16, 0b00110000
+out DDRB, r16
+ldi r16, 0b00001111
+out PORTB, r16
+
+cbi DDRC, PC0
+sbi PORTC, PC0
+sbi DDRC, PC1
+cbi PORTC, PC1
+
+ldi r16, 0b11110000
+out DDRD, r16
+rcall MOTOR_OFF
+
+ldi r16, 0
+sts UBRR0H, r16
+ldi r16, 103
+sts UBRR0L, r16
+ldi r16, (1<<RXEN0) | (1<<TXEN0)
+sts UCSR0B, r16
+ldi r16, (1<<UCSZ01)|(1<<UCSZ00)
+sts UCSR0B, r16
+
+ldi r16, (1<<PCIE1)
+sts PCICR, r16
+ldi r16, (1<<PCINT8)
+sts PCMSK1, r16
+
+ldi r20, 0
+ldi r21, 0
+ldi r22, 0
+
+sei
+rcall MSG_CERRADA
+
+MAIN:
+
+rcall REVISAR_MENSAJE_DE_SEGURIDAD
+cpi r20, 0
+breq ESTADO_CERRADA
+cpi r20, 1
+breq ESTADO_ABRIENDO
+cpi r20, 2
+breq ESTADO_ABIERTO
+cpi r20, 3
+breq ESTADO_CERRANDO
+cpi r20, 4
+breq ESTADO_DETENIDA
+rjmp MAIN
+
+; ESTADO 0
+;------------------------------------
+
+ESTADO_CERRADA:
+
+rcall MOTOR_OFF
+cbi PORTB, PB4
+cbi PORTB, PB5
+cbi PORTC, PC1
+
+sbic PINB, PB0
+rjmp MAIN
+
+ESPERA_ABRIR:
+
+sbis PINB, PB0
+rjmp ESPERA_ABRIR
+
+ldi r20, 1
+rcall MSG_ABRIENDO
+rjmp MAIN
+
+; ESTADO 1
+;-----------------------------------
+
+ESTADO_ABRIENDO:
+
+sbi PORTB, PB4
+cbi PORTB, PB5
+sbi PORTC, PC1
+
+sbis PINB, PB2
+rjmp LLEGO_ABIERTA
+
+rcall PASO_ADELANTE
+rcall RETARDO_MOTOR
+
+rjmp MAIN
+
+LLEGO_ABIERTA:
+rcall MOTOR_OFF
+cbi PORTB, PB4
+cbi PORTC, PC1
+ldi r20, 2
+rcall MSG_ABIERTA
+
+ESPERA_PUERTA_ABIERTA:
+
+sbis PINB, PB2
+rjmp ESPERA_PUERTA_ABIERTA
+rjmp MAIN
+
+;ESTADO 2
+;---------------------------------
+
+ESTADO_ABIERTA:
+
+rcall MOTOR_OFF
+cbi PORTB, PB4
+cbi PORTB, PB5
+cbi PORTC, PC1
+
+sbic PINB, PB1
+rjmp MAIN
+
+ESPERA_CERRAR:
+sbis PINB, PB1
+rjmp ESPERA_CERRAR
+
+ldi r20, 3
+rcall MSG_CERRANDO
+rjmp MAIN
+
+;ESTADO 3
+;-----------------------------
+
+ESTADO_CERRANDO:
+
+cbi PORTB, PB4
+sbi PORTB, PB5
+sbi PORTC, PC1
+
+sbis PINB, PB3
+rjmp LLEGO_CERRADA
+
+rcall PASO_ATRAS
+rcall RETARDO_MOTOR
+rjmp MAIN
+
+LLEGO_CERRADA:
+
+rcall MOTOR_OFF
+cbi PORTB, PB5
+cbi PORTC, PC1
+ldi r20, 0
+rcall MSG_CERRADA
+
+ESPERA_PUERTA_CERRADA:
+
+sbis PINB, PB3
+rjmp ESPERA_PUERTA_CERRADA
+
 

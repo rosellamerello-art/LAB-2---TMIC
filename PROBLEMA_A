@@ -327,3 +327,104 @@ breq COL7
 
 rjmp COL8
 
+COL1:
+sbi PORTB, 0
+rjmp MOSTRAR_FILAS
+
+COL2:
+sbi PORTB, 1
+rjmp MOSTRAR_FILAS
+
+COL3:
+sbi PORTB, 2
+rjmp MOSTRAR_FILAS
+
+COL4:
+sbi PORTB, 3
+rjmp MOSTRAR_FILAS
+
+COL5:
+sbi PORTB, 4
+rjmp MOSTRAR_FILAS
+
+COL6:
+sbi PORTB, 5
+rjmp MOSTRAR_FILAS
+
+COL7:
+sbi PORTC, 0
+rjmp MOSTRAR_FILAS
+
+COL8:
+sbi PORTC, 1
+
+MOSTRAR_FILAS:
+
+sbrs r20, 0
+rjmp NO_F1
+cbi PORTD, 2
+
+NO_F1:
+sbrs r20, 1
+rjmp NO_F2
+cbi PORTD, 3
+
+NO_F2:
+sbrs r20, 2
+rjmp NO_F3
+cbi PORTD, 4
+
+NO_F3:
+sbrs r20, 3
+rjmp NO_F4
+cbi PORTD, 5
+
+NO_F4:
+sbrs r20, 4
+rjmp NO_F5
+cbi PORTD, 6
+
+NO_F5:
+sbrs r20, 5
+cbi PORTD, 7
+
+NO_F6:
+sbrs r20, 6
+rjmp NO_F7
+cbi PORTC, 2
+
+NO_F7:
+sbrs r20, 7
+rjmp NO_F8
+cbi PORTC, 3
+
+NO_F8:
+rcall RETARDO_MUX
+ret
+
+;AGREGA CARITA SONRIENTE Y CARITA GUINO
+
+MOSTRAR_CARITA:
+rcall APAGAR_TODO
+sbi PORTB, 2
+sbi PORTB, 5
+cbi PORTD, 3
+rcall RETARDO_MUX
+
+rcall APAGAR_TODO
+sbi PORTB, 2
+sbi PORTB, 3
+sbi PORTB, 4
+sbi PORTB, 5
+cbi PORTD, 7
+rcall RETARDO_MUX
+
+ret
+
+MOSTRAR_GUINO:
+rcall APAGAR_TODO
+sbi PORTB, 2
+sbi PORTB, 5
+sbi PORTc, 0
+cbi PORTd, 3
+rcall RETARDO_MUX

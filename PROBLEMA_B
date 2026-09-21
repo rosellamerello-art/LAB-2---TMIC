@@ -23,5 +23,15 @@ ldi r16, 0
 out PORTD, r16
 out PORTB, r16
 
+;USUART 9600 baud
+ldi r16, 0
+sts UBRR0H, r16
+ldi r16, 103
+sts UBRR0L, r16
+ldi r16, (1<<RXEN0) | (1<<TXEN0)
+sts UCSR0B, r16
+ldi r16, (1<<UCSZ01) | (1<<UCSZ00)
+sts UCSR0C, R16
+
 MAIN:
 rjmp MAIN

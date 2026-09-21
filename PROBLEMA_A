@@ -1,3 +1,71 @@
+; ============================================================
+; LABORATORIO 2 - PROBLEMA A
+; MATRIZ LED 8x8 1088AS + USART + LUT
+; MICROCONTROLADOR ATmega328P / ARDUINO UNO
+;
+; FUNCIONAMIENTO:
+; El programa controla una matriz LED 8x8 mediante multiplexado.
+; A traves de USART se seleccionan diferentes modos de
+; funcionamiento y la velocidad de desplazamiento del mensaje.
+;
+; OPCIONES USART:
+; 1 = Mostrar mensaje "MICROS LO MEJOR"
+; 2 = Mostrar carita sonriente
+; 3 = Mostrar carita guinando
+; 4 = Velocidad lenta
+; 5 = Velocidad media
+; 6 = Velocidad rapida
+;
+; FILAS DE LA MATRIZ - ACTIVAS EN LOW:
+; F1 = D2  = PD2
+; F2 = D3  = PD3
+; F3 = D4  = PD4
+; F4 = D5  = PD5
+; F5 = D6  = PD6
+; F6 = D7  = PD7
+; F7 = A2  = PC2
+; F8 = A3  = PC3
+;
+; COLUMNAS DE LA MATRIZ - ACTIVAS EN HIGH:
+; C1 = D8  = PB0
+; C2 = D9  = PB1
+; C3 = D10 = PB2
+; C4 = D11 = PB3
+; C5 = D12 = PB4
+; C6 = D13 = PB5
+; C7 = A0  = PC0
+; C8 = A1  = PC1
+;
+; USART:
+; D0 = PD0 = RX
+; D1 = PD1 = TX
+; Velocidad = 9600 baudios
+; Formato = 8 bits, sin paridad, 1 bit de parada (8N1)
+; F_CPU = 16 MHz
+;
+; REGISTROS UTILIZADOS:
+; r17 = caracter recibido por USART
+; r18 = registro auxiliar
+; r19 = velocidad del desplazamiento
+;       1 = lenta, 2 = media, 3 = rapida
+; r20 = patron de filas de la matriz
+; r21 = contador auxiliar de retardo
+; r22 = modo de funcionamiento
+;       0 = espera
+;       1 = mensaje
+;       2 = carita
+;       3 = guino
+; r23 = posicion actual del desplazamiento
+; r24 = contador externo de velocidad
+; r25 = columna actual de la matriz
+;
+; LUT:
+; Contiene los patrones necesarios para representar
+; el mensaje "MICROS LO MEJOR".
+; Cada byte representa una columna de la matriz.
+; bit0 = F1 ... bit7 = F8
+; ============================================================
+
 ;CONFIGURA PUERTOS E INICIALIZACION DEL ATMEGA328P"
 .include "m328pdef.inc"
 .cseg

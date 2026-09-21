@@ -196,5 +196,44 @@ ESPERA_PUERTA_CERRADA:
 
 sbis PINB, PB3
 rjmp ESPERA_PUERTA_CERRADA
+rjmp MAIN
+
+;ESTADO 4
+;-----------------------------
+
+ESTADO_DETENIDA:
+
+rcall MOTOR_OFF
+cbi PORTB, PB4
+cbi PORTB, PB5
+cbi PORTC, PC1
+
+sbic PINB, PB0
+rjmp REVISAR_CERRAR_SEG
+
+ESPERA_ABRIR_SEG:
+
+sbis PINB, PB0
+rjmp ESPERA_ABRIR_SEG
+ldi r20, 1
+rcall MSG_ABRIENDO
+rjmp MAIN
+
+REVISAR_CARRAR_SEG:
+sbic PINB, PB1
+rjmp MAIN
+
+ESPERA_CERRAR_SEG:
+sbic PINB, PB1
+rjmp ESPERA_CERRAR_SEG
+ldi r20, 3
+rcall MSG_CERRANDO
+rjmp MAIN
+
+;INTERRUPCIÓN POR OBSTÁCULO
+;-----------------------------------
+
+
+
 
 

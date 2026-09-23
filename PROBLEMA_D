@@ -22,6 +22,18 @@ sbi PORTB, PB0
 sbi PORTB, PB1
 sbi PORTB, PB2
 
+;USART 9600 baud - 8N1
+ldi r16, 0
+sts UBRR0H, r16
+ldi r16, 103
+sts UBRR0L, r16
+
+;Solo transmisor
+ldi r16, (1<<TXEN0)
+sts UCSR0B, r16
+ldi r16, (1<<UCSZ01) | (1<<UCSZ00)
+sts UCSR0C, r16
+
 
 
 

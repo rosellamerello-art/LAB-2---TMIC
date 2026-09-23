@@ -232,6 +232,214 @@ rjmp MAIN
 
 ;INTERRUPCIÓN POR OBSTÁCULO
 ;-----------------------------------
+PCINT1_ISR:
+push r16
+in r16, SREG
+push r16
+
+sbic PINC, PC0
+rjmp FIN_PCINT1
+
+cpi r20, 1
+breq OBSTACULO_DETECTADO
+
+cpi r20, 3
+breq OBSTACULO_DETECTADO
+rjmp FIN_PCINT1
+
+OBSTACULO_DETECTADO:
+in r16, PORTD
+andi r16, 0b00001111
+out PORTD, r16
+
+cbi PORTB, PB4
+cbi PORTB, PB5
+cbi PORTC, PC1
+
+ldi r20, 4
+ldi r21, 1
+
+FIN_PCINT1:
+pop r16
+out SREG, r16
+pop r16
+reti
+
+REVISAR_MENSAJE_SEGURIDAD:
+cpi r21, 1
+brne FIN_REVISAR_SEG
+ldi r21, 0
+rcall MSG_OBSTACULO
+rcall MSG_SEGURIDAD
+
+FIN_REVISAR_SEG:
+ret
+
+;MOTOR PASO A PASO
+;----------------------------------------
+
+PASO_ADELANTE:
+inc r22
+andi r22, 0x07
+rjmp ESCRIBIR_PASO
+
+PASO_ATRAS:
+tst r22
+brne PA_DEC
+ldi r22, 7
+rjmp ESCRIBIR_PASO
+
+PA_DEC:
+dec r22
+
+ESCRIBIR_PASO:
+cpi r22, 0
+breq STEP0
+cpi r22, 1
+breq STEP1
+cpi r22, 2
+breq STEP2
+cpi r22, 3
+breq STEP3
+cpi r22, 4
+breq STEP4
+cpi r22, 5
+breq STEP5
+cpi r22, 6
+breq STEP6
+rjmp STEP7
+
+STEP0:
+ldi r16, 0x10
+rjmp ESCRIBIR_MOTOR
+
+STEP1:
+ldi r16, 0x30
+rjmp ESCRIBIR_MOTOR
+
+STEP2:
+ldi r16, 0x20
+rjmp ESCRIBIR_MOTOR
+
+STEP3:
+ldi r16, 0x60
+rjmp ESCRIBIR_MOTOR
+
+STEP4:
+ldi r16, 0x40
+rjmp ESCRIBIR_MOTOR
+
+STEP5:
+ldi r16, 0xC0
+rjmp ESCRIBIR_MOTOR
+
+STEP6:
+ldi r16, 0x80
+rjmp ESCRIBIR_MOTOR
+
+STEP7:
+ldi r16, 0x90
+
+ESCRIBIR_MOTOR:
+in r18, PORTD
+andi r18, 0b00001111
+or r18, r16
+out PORTD, r18
+ret
+
+MOTOR_OFF:
+in r16, PORTD
+andi r16, 0b00001111
+out PORTD, r16
+ret
+
+RETARDO_MOTOR:
+ldi r18, 100
+RM1:
+ldi r19, 100
+RM2:
+dec r19
+brne RM2
+dec r18
+brne RM1
+ret
+
+;USART
+;---------------
+
+USART_TX:
+TX_WAIT:
+lds r18, UCSR0A
+sbrs r18, UDRE0
+rjmp TX_WAIT
+sts UDR0, r16
+ret
+
+LINEA_NUEVA:
+ldi r16, 13
+rcall USART_TX
+ldi r16, 10
+rcall USART_TX
+ret
+
+MSG_CERRADA:
+ldi ZL, LOW(TXT_CERRADA*2)
+ldi ZH, HIGH(TXT_CERRADA*2)
+rjmp ENVIAR_TEXTO
+
+MSG_ABRIENDO:
+ldi ZL, LOW(TXT_ABRIENDO*2)
+ldi ZH, HIGH(TXT_ABRIENDO*2)
+rjmp ENVIAR_TEXTO
+
+MSG_ABIERTA:
+ldi ZL, LOW(TXT_ABIERTA*2)
+ldi ZH, HIGH(TXT_ABIERTA*2)
+rjmp ENVIAR_TEXTO
+
+MSG_CERRANDO:
+ldi ZL, LOW(TXT_CERRANDO*2)
+ldi ZH, HIGH(TXT_CERRANDO*2)
+rjmp ENVIAR_TEXTO
+
+MSG_OBSTACULO:
+ldi ZL, LOW(TXT_OBSTACULO*2)
+ldi ZH; HIGH(TXT_OBSTACULO*2)
+rjmp ENVIAR_TEXTO
+
+MSG_SEGURIDAD:
+ldi ZL, LOW(TXT_SEGURIDAD*2)
+ldi ZH, HIGH(TXT_SEGURIDAD*2)
+rjmp ENVIAR_TEXTO
+
+ET_LOOP:
+lmp r16, Z+
+tst r16
+breq ET_FIN
+rcall USART_TX
+rjmp ET_LOOP
+
+ET_FIN:
+rcall NUEVA_LINEA
+ret
+
+TXT_CERRADA:
+.db "PUERTA CERRADA", 0
+
+TXT_ABRIENDO:
+.db "PUERTA ABRIENDO", 0
+
+TXT_ABIERTA:
+.db "PUERTA ABIERTA", 0
+
+TXT_CERRANDO:
+.db "PUERTA CERRANDO", 0
+
+TXT_OBSTACULO:
+.db "OBSTACULO DETECTADO"
+
+TXT_SEGURIDAD:
+.db "MOVIMIENTO DETENIDO POR SEGURIDAD", 0
 
 
 

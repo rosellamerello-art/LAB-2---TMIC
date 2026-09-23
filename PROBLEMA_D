@@ -1,1 +1,17 @@
+.include "m328pdef.inc"
+
+.cseg
+.org 0x0000
+rjmp RESET
+
+RESET:
+;Pila
+ldi r16, HIGH(RAMEND)
+out SPH, r16
+ldi r16, LOW(RAMEND)
+out SPL, r16
+
+MAIN:
+rjmp MAIN
+
 

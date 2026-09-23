@@ -210,6 +210,9 @@ cbi PORTB, PB4
 cbi PORTB, PB5
 cbi PORTC, PC1
 
+sbis PINC, PC0
+rjmp ESTADO_DETENIDA
+
 sbic PINB, PB0
 rjmp REVISAR_CERRAR_SEG
 

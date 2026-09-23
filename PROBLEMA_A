@@ -66,17 +66,17 @@
 ; bit0 = F1 ... bit7 = F8
 ; ============================================================
 
-;CONFIGURA PUERTOS E INICIALIZACION DEL ATMEGA328P"
+;CONFIGURA PUERTOS E INICIALIZACION DEL ATMEGA328P
 .include "m328pdef.inc"
 .cseg
 .org 0x0000
 rjmp RESET
 
 RESET:
-ldi r16, HIGH (RAMEND)
+ldi r16, HIGH(RAMEND)
 out SPH, r16
 
-ldi r16, LOW (RAMEND)
+ldi r16, LOW(RAMEND)
 out SPL, r16
 
 ldi r16, 0b11111100
@@ -505,8 +505,8 @@ MOSTRAR_GUINO:
 rcall APAGAR_TODO
 sbi PORTB, 2
 sbi PORTB, 5
-sbi PORTc, 0
-cbi PORTd, 3
+sbi PORTC, 0
+cbi PORTD, 3
 rcall RETARDO_MUX
 
 rcall APAGAR_TODO
